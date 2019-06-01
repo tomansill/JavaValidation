@@ -33,8 +33,8 @@ I think `IllegalArgumentException` is more appropriate exception to best describ
 For now, you need to build and install it on your machine.
 
 ```bash
-$ git clone https://github.com/tomansill/java-validation
-$ cd java-validation
+$ git clone https://github.com/tomansill/javavalidation
+$ cd javavalidation
 $ mvn install
 ```
 
