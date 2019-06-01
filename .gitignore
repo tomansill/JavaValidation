@@ -1,0 +1,5 @@
+target/
+**/*.iml
+*.iml
+.attached_pid*
+.idea/
