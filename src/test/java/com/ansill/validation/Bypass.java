@@ -4,8 +4,19 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-/** Class that bypass the access mechanisms and to be used for testing */
-public final class Bypass{
+/**
+ * Class that bypass the access mechanisms and to be used for testing
+ */
+public final class Bypass {
+
+    @Nonnull
+    public static final String INVALID_EMAIL_MESSAGE = Validation.INVALID_EMAIL_MESSAGE;
+
+    @Nonnull
+    public static final String INVALID_HOSTNAME_MESSAGE = Validation.INVALID_HOSTNAME_MESSAGE;
+
+    @Nonnull
+    public static final String INVALID_PORT_MESSAGE = Validation.INVALID_PORT_MESSAGE;
 
     @Nonnull
     public static final String OBJECT_NULL_MESSAGE = Validation.OBJECT_NULL_MESSAGE;

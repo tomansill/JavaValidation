@@ -6,7 +6,8 @@
 
     <groupId>com.ansill.validation</groupId>
     <artifactId>validation</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
+    <!-- mvn versions:set -DnewVersion=your version -->
 
     <packaging>jar</packaging>
 

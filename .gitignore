@@ -3,3 +3,4 @@ target/
 *.iml
 .attach_pid*
 .idea/
+*.versionsBackup
