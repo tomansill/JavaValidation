@@ -23,7 +23,9 @@ public class TestValues{
 
   public static final HashSet<String> VALID_EMAIL_ADDRESSES = new HashSet<>(Arrays.asList(
     "email@example.com",
-    "firstname.lastname@example.com",
+    "firsStname.lastname@example.com",
+    "firstn123ame.lastname@example.com",
+    "f7L6G@fake.com",
     "email@subdomain.example.com",
     "firstname+lastname@example.com",
     "email@123.123.123.123",

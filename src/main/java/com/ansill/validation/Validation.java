@@ -257,7 +257,7 @@ public final class Validation {
         email_address = innerAssertNonnull(email_address, variable_name, 1);
 
         // Exit if valid
-        if (VALID_EMAIL_REGEX.matcher(email_address).matches()) return email_address;
+        if(VALID_EMAIL_REGEX.matcher(email_address.toLowerCase()).matches()) return email_address;
 
         // Otherwise go ahead and throw exception
         String message = composeMessage(variable_name, INVALID_EMAIL_MESSAGE);
