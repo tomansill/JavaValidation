@@ -4,7 +4,12 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -30,7 +35,8 @@ public final class Validation {
     private static final Pattern VALID_IP_REGEX = Pattern.compile("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$");
     /** Regex pattern for valid email address */
     @Nonnull
-    private static final Pattern VALID_EMAIL_REGEX = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])");
+    private static final Pattern VALID_EMAIL_REGEX = Pattern.compile(
+      "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])");
 
     /** Message for object with null values */
     @Nonnull
@@ -39,6 +45,14 @@ public final class Validation {
     /** Message for natural number error */
     @Nonnull
     static final String NATURAL_NUMBER_MESSAGE = "is expected to be a natural number (1, 2, ..., N-1, N) but it is actually not a natural number";
+
+    /** Message for greater comparison error */
+    @Nonnull
+    static final String GREATER_NUMBER_MESSAGE = "is expected to be greater number, but it is not";
+
+    /** Message for lesser comparison error */
+    @Nonnull
+    static final String LESSER_NUMBER_MESSAGE = "is expected to be lesser number, but it is not";
 
     /** Message for non-negative number error */
     @Nonnull
@@ -306,13 +320,275 @@ public final class Validation {
     }
 
     /**
+     * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+     *
+     * @param number  number to be asserted
+     * @param compare number being compared
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static int assertGreaterThan(int number, long compare) throws IllegalArgumentException{
+        return (int) innerAssertGreaterThan(number, compare, null);
+    }
+
+    /**
+     * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+     *
+     * @param number        number to be asserted
+     * @param compare       number being compared
+     * @param variable_name name of variable
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static int assertGreaterThan(int number, long compare, @Nonnull String variable_name)
+    throws IllegalArgumentException{
+        assertNonnull(variable_name, "variable_name");
+        return (int) innerAssertGreaterThan(number, compare, variable_name);
+    }
+
+    /**
+     * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+     *
+     * @param number  number to be asserted
+     * @param compare number being compared
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static long assertGreaterThan(long number, long compare) throws IllegalArgumentException{
+        return innerAssertGreaterThan(number, compare, null);
+    }
+
+    /**
+     * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+     *
+     * @param number        number to be asserted
+     * @param compare       number being compared
+     * @param variable_name name of variable
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static long assertGreaterThan(long number, long compare, @Nonnull String variable_name)
+    throws IllegalArgumentException{
+        assertNonnull(variable_name, "variable_name");
+        return innerAssertGreaterThan(number, compare, variable_name);
+    }
+
+    /**
+     * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+     *
+     * @param number        number to be asserted
+     * @param compare       number being compared
+     * @param variable_name name of variable
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    private static long innerAssertGreaterThan(long number, long compare, @Nullable String variable_name)
+    throws IllegalArgumentException{
+
+        // Exit if not null
+        if(number > compare) return number;
+
+        // Otherwise go ahead and throw exception
+        String message = composeMessage(variable_name, GREATER_NUMBER_MESSAGE);
+
+        // Create exception
+        IllegalArgumentException iae = new IllegalArgumentException(message);
+
+        // Update stacktrace and throw it
+        throw updateStackTrace(iae, 0);
+    }
+
+    /**
+     * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+     *
+     * @param number  number to be asserted
+     * @param compare number being compared
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static int assertLesserThan(int number, long compare) throws IllegalArgumentException{
+        return (int) innerAssertLesserThan(number, compare, null);
+    }
+
+    /**
+     * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+     *
+     * @param number        number to be asserted
+     * @param compare       number being compared
+     * @param variable_name name of variable
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static int assertLesserThan(int number, long compare, @Nonnull String variable_name)
+    throws IllegalArgumentException{
+        assertNonnull(variable_name, "variable_name");
+        return (int) innerAssertLesserThan(number, compare, variable_name);
+    }
+
+    /**
+     * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+     *
+     * @param number  number to be asserted
+     * @param compare number being compared
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static long assertLesserThan(long number, long compare) throws IllegalArgumentException{
+        return innerAssertLesserThan(number, compare, null);
+    }
+
+    /**
+     * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+     *
+     * @param number        number to be asserted
+     * @param compare       number being compared
+     * @param variable_name name of variable
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static long assertLesserThan(long number, long compare, @Nonnull String variable_name)
+    throws IllegalArgumentException{
+        assertNonnull(variable_name, "variable_name");
+        return innerAssertLesserThan(number, compare, variable_name);
+    }
+
+
+    /**
+     * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+     *
+     * @param number  number to be asserted
+     * @param compare number being compared
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static int assertGreaterThanOrEqual(int number, long compare) throws IllegalArgumentException{
+        return (int) innerAssertGreaterThanOrEqual(number, compare, null);
+    }
+
+    /**
+     * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+     *
+     * @param number        number to be asserted
+     * @param compare       number being compared
+     * @param variable_name name of variable
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static int assertGreaterThanOrEqual(int number, long compare, @Nonnull String variable_name)
+    throws IllegalArgumentException{
+        assertNonnull(variable_name, "variable_name");
+        return (int) innerAssertGreaterThanOrEqual(number, compare, variable_name);
+    }
+
+    /**
+     * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+     *
+     * @param number  number to be asserted
+     * @param compare number being compared
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static long assertGreaterThanOrEqual(long number, long compare) throws IllegalArgumentException{
+        return innerAssertGreaterThanOrEqual(number, compare, null);
+    }
+
+    /**
+     * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+     *
+     * @param number        number to be asserted
+     * @param compare       number being compared
+     * @param variable_name name of variable
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static long assertGreaterThanOrEqual(long number, long compare, @Nonnull String variable_name)
+    throws IllegalArgumentException{
+        assertNonnull(variable_name, "variable_name");
+        return innerAssertGreaterThanOrEqual(number, compare, variable_name);
+    }
+
+    /**
+     * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+     *
+     * @param number        number to be asserted
+     * @param compare       number being compared
+     * @param variable_name name of variable
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    private static long innerAssertGreaterThanOrEqual(long number, long compare, @Nullable String variable_name)
+    throws IllegalArgumentException{
+
+        // Exit if not null
+        if(number > compare) return number;
+
+        // Otherwise go ahead and throw exception
+        String message = composeMessage(variable_name, GREATER_NUMBER_MESSAGE);
+
+        // Create exception
+        IllegalArgumentException iae = new IllegalArgumentException(message);
+
+        // Update stacktrace and throw it
+        throw updateStackTrace(iae, 0);
+    }
+
+    /**
+     * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+     *
+     * @param number        number to be asserted
+     * @param compare       number being compared
+     * @param variable_name name of variable
+     * @return valid number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    private static long innerAssertLesserThan(long number, long compare, @Nullable String variable_name)
+    throws IllegalArgumentException{
+
+        // Exit if not null
+        if(number < compare) return number;
+
+        // Otherwise go ahead and throw exception
+        String message = composeMessage(variable_name, LESSER_NUMBER_MESSAGE);
+
+        // Create exception
+        IllegalArgumentException iae = new IllegalArgumentException(message);
+
+        // Update stacktrace and throw it
+        throw updateStackTrace(iae, 0);
+    }
+
+    /**
      * Asserts that number is a natural number. If it is not a natural number, then an exception will be thrown.
      *
      * @param number number to be asserted
      * @return valid nonnegative number
      * @throws IllegalArgumentException thrown if the number is invalid in any way
      */
-    public static long assertNaturalNumber(long number) throws IllegalArgumentException {
+    public static int assertNaturalNumber(int number) throws IllegalArgumentException{
+        return (int) innerAssertNaturalNumber(number, null);
+    }
+
+    /**
+     * Asserts that number is a natural number. If it is not a natural number, then an exception will be thrown.
+     *
+     * @param number        number to be asserted
+     * @param variable_name name of variable
+     * @return valid nonnegative number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static int assertNaturalNumber(int number, @Nonnull String variable_name) throws IllegalArgumentException{
+        assertNonnull(variable_name, "variable_name");
+        return (int) innerAssertNaturalNumber(number, variable_name);
+    }
+
+    /**
+     * Asserts that number is a natural number. If it is not a natural number, then an exception will be thrown.
+     *
+     * @param number number to be asserted
+     * @return valid nonnegative number
+     * @throws IllegalArgumentException thrown if the number is invalid in any way
+     */
+    public static long assertNaturalNumber(long number) throws IllegalArgumentException{
         return innerAssertNaturalNumber(number, null);
     }
 
