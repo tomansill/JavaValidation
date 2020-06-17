@@ -12,6 +12,7 @@ So I decided to build a library to make things a bit easier for me.
 ### Why not use `Objects.requireNonNull(T)`? 
 
 `Objects.requireNonNull(T)` will throw `NullPointerException` and I disagree with this choice of exception because `NullPointerException` is supposed to be thrown in event of null object being de-referenced. Like: 
+
 ```
 StringBuilder sb = null;
 sb.append("something"); // <-- This will throw NullPointerException because you are trying to de-reference a null object
@@ -24,13 +25,24 @@ I think `IllegalArgumentException` is more appropriate exception to best describ
 ## Prerequisites
 
 * Java 8 or better
-* Maven
 
 ## Download
 
-**No Maven Repository available yet ):**
+### Package Repository
 
-For now, you need to build and install it on your machine.
+The library is availble for download on Sonatype public Maven repository (https://oss.sonatype.org/#nexus):
+
+```xml
+<dependency>
+  <groupId>com.ansill.validation</groupId>
+  <artifactId>validation</artifactId>
+  <version>0.2.2</version>
+</dependency>
+```
+
+### Build
+
+Maven (or other similar build tools) is needed to build and install JavaValidation.
 
 ```bash
 $ git clone https://github.com/tomansill/javavalidation
@@ -44,7 +56,7 @@ Then include the dependency in your project's `pom.xml`:
 <dependency>
     <groupId>com.ansill.validation</groupId>
     <artifactId>validation</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.2</version>
 </dependency>
 ```
 
@@ -64,16 +76,16 @@ public class Application{
         application.print(message);
     }
     public void print(String message){
-        Validation.assertNonnull(message);
-        System.out.println(message);
+        System.out.println(Validation.assertNonnull(message));
     }
 }
 ```
 
 When you run the code, it will yield this message:
+
 ```
 Exception in thread "main" java.lang.IllegalArgumentException: Value is expected to be non-null but is found to be null
-	at Application.print(Application.java:10)
+	at Application.print(Application.java:9)
 	at Application.main(Application.java:7)
 ```
 
@@ -91,16 +103,16 @@ public class Application{
     }
     private int port = 80;
     public void setPort(int port){
-        Validation.assertNaturalNumber(port, "port");
-        this.port = port;
+        this.port = Validation.assertNaturalNumber(port, "port");
     }
 }
 ```
 
 When you run the code, it will yield this message:
+
 ```
 Exception in thread "main" java.lang.IllegalArgumentException: Value in variable 'port' is expected to be a natural number (1, 2, ..., N-1, N) but it is actually not a natural number
-	at Application.setPort(Application.java:10)
+	at Application.setPort(Application.java:9)
 	at Application.main(Application.java:6)
 ```
 
@@ -125,6 +137,7 @@ public class Application{
 ```
 
 When you run the code, it will yield this message:
+
 ```
 Exception in thread "main" java.lang.IllegalArgumentException: Value is expected to be non-negative but value is actually a negative number
 	at Application.add(Application.java:10)
@@ -151,6 +164,7 @@ public class Application{
 ```
 
 When you run the code, it will yield this message:
+
 ```
 Exception in thread "main" java.lang.IllegalArgumentException: Value in variable 'name' is expected to be non-empty but value is actually a empty string
 	at Application.<init>(Application.java:9)
@@ -179,6 +193,7 @@ public class Application{
 ```
 
 When you run the code, it will yield this message:
+
 ```
 Exception in thread "main" java.lang.IllegalArgumentException: Value is expected to be non-empty but value is actually empty
 	at Application.<init>(Application.java:11)
@@ -207,6 +222,7 @@ public class Application{
 ```
 
 When you run the code, it will yield this message:
+	
 ```
 Exception in thread "main" java.lang.IllegalArgumentException: Value is expected to have all of its list members to be non-null but the list contains null members. Invalid members are located at indices [1, 3, 4]
 	at Application.<init>(Application.java:11)

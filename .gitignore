@@ -4,3 +4,4 @@ target/
 .attach_pid*
 .idea/
 *.versionsBackup
+*.backup
