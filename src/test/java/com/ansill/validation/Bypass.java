@@ -16,6 +16,9 @@ public final class Bypass{
   public static final String INVALID_HOSTNAME_MESSAGE = Validation.INVALID_HOSTNAME_MESSAGE;
 
   @Nonnull
+  public static final String INVALID_IP_MESSAGE = Validation.INVALID_IP_MESSAGE;
+
+  @Nonnull
   public static final String INVALID_PORT_MESSAGE = Validation.INVALID_PORT_MESSAGE;
 
   @Nonnull

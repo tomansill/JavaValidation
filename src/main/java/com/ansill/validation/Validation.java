@@ -24,7 +24,11 @@ public final class Validation{
 
   /** Message for invalid hostname */
   @Nonnull
-  static final String INVALID_HOSTNAME_MESSAGE = "is expected to be a valid hostname/IP address but it is actually not a valid hostname/IP address";
+  static final String INVALID_HOSTNAME_MESSAGE = "is expected to be a valid hostname but it is actually not a valid hostname";
+
+  /** Message for invalid ip address */
+  @Nonnull
+  static final String INVALID_IP_MESSAGE = "is expected to be a valid IP but it is actually not a valid IP";
 
   /** Message for invalid port numbers */
   @Nonnull
@@ -65,12 +69,17 @@ public final class Validation{
   /** Regex pattern for valid hostname */
   @Nonnull
   private static final Pattern VALID_HOSTNAME_REGEX = Pattern.compile(
-    "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
-
-  /** Regex pattern for valid ip address */
-  @Nonnull
-  private static final Pattern VALID_IP_REGEX = Pattern.compile(
     "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$");
+
+  /** Regex pattern for valid IPv4 address */
+  @Nonnull
+  private static final Pattern VALID_IPV4_REGEX = Pattern.compile(
+    "^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}$");
+
+  /** Regex pattern for valid IPv6 address */
+  @Nonnull
+  private static final Pattern VALID_IPV6_REGEX = Pattern.compile(
+    "(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))");
 
   /** Regex pattern for valid email address */
   @Nonnull
@@ -79,6 +88,7 @@ public final class Validation{
 
   private Validation(){
     // Prevents any instantiation
+    throw new AssertionError("No " + this.getClass().getName() + " instances for you!");
   }
 
   /**
@@ -210,11 +220,65 @@ public final class Validation{
     hostname = innerAssertNonnull(hostname, variable_name, 1);
 
     // Exit if valid
-    if(VALID_HOSTNAME_REGEX.matcher(hostname).matches() || VALID_IP_REGEX.matcher(hostname).matches())
-      return hostname;
+    if(VALID_HOSTNAME_REGEX.matcher(hostname).matches()) return hostname;
 
     // Otherwise go ahead and throw exception
     String message = composeMessage(variable_name, INVALID_HOSTNAME_MESSAGE);
+
+    // Create exception
+    IllegalArgumentException iae = new IllegalArgumentException(message);
+
+    // Update stacktrace and throw it
+    throw updateStackTrace(iae, 0);
+  }
+
+  /**
+   * Asserts that IP address is valid. If it is invalid, then an exception will be thrown.
+   *
+   * @param address IP address to be asserted
+   * @return valid IP address
+   * @throws IllegalArgumentException thrown if the IP address is invalid in any way
+   */
+  @Nonnull
+  public static String assertValidIPAddress(@Nullable String address) throws IllegalArgumentException{
+    return innerAssertValidIPAddress(address, null);
+  }
+
+  /**
+   * Asserts that IP address is valid. If it is invalid, then an exception will be thrown.
+   *
+   * @param address       IP address to be asserted
+   * @param variable_name name of variable
+   * @return valid IP address
+   * @throws IllegalArgumentException thrown if the IP address is invalid in any way
+   */
+  @Nonnull
+  public static String assertValidIPAddress(@Nullable String address, @Nonnull String variable_name)
+  throws IllegalArgumentException{
+    innerAssertNonnull(variable_name, "variable_name", -1);
+    return innerAssertValidIPAddress(address, variable_name);
+  }
+
+  /**
+   * Asserts that IP address is valid. If it is invalid, then an exception will be thrown.
+   *
+   * @param address       IP address to be asserted
+   * @param variable_name name of variable
+   * @return valid IP address
+   * @throws IllegalArgumentException thrown if the IP address is invalid in any way
+   */
+  @Nonnull
+  private static String innerAssertValidIPAddress(@Nullable String address, @Nullable String variable_name)
+  throws IllegalArgumentException{
+
+    // Assert non null
+    address = innerAssertNonnull(address, variable_name, 1);
+
+    // Exit if valid
+    if(VALID_IPV4_REGEX.matcher(address).matches() || VALID_IPV6_REGEX.matcher(address).matches()) return address;
+
+    // Otherwise go ahead and throw exception
+    String message = composeMessage(variable_name, INVALID_IP_MESSAGE);
 
     // Create exception
     IllegalArgumentException iae = new IllegalArgumentException(message);
