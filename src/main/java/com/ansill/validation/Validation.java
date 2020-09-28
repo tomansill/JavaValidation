@@ -220,7 +220,11 @@ public final class Validation{
     hostname = innerAssertNonnull(hostname, variable_name, 1);
 
     // Exit if valid
-    if(VALID_HOSTNAME_REGEX.matcher(hostname).matches()) return hostname;
+    if(VALID_HOSTNAME_REGEX.matcher(hostname).matches() ||
+       VALID_IPV4_REGEX.matcher(hostname).matches() ||
+       VALID_IPV6_REGEX.matcher(hostname).matches()){
+      return hostname;
+    }
 
     // Otherwise go ahead and throw exception
     String message = composeMessage(variable_name, INVALID_HOSTNAME_MESSAGE);
@@ -329,6 +333,11 @@ public final class Validation{
     // Assert non null
     email_address = innerAssertNonnull(email_address, variable_name, 1);
 
+    // Lowercase email address
+    email_address = email_address.toLowerCase();
+
+    int split = findAtSymbol(email_address);
+
     // Exit if valid
     if(VALID_EMAIL_REGEX.matcher(email_address.toLowerCase()).matches()) return email_address;
 
@@ -340,6 +349,10 @@ public final class Validation{
 
     // Update stacktrace and throw it
     throw updateStackTrace(iae, 0);
+  }
+
+  private static int findAtSymbol(@Nonnull String emailAddress){
+    return 0;
   }
 
   /**

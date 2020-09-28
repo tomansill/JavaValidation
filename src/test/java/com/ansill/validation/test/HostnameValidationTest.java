@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
@@ -22,7 +23,7 @@ class HostnameValidationTest{
   @DisplayName("Test validating a valid hostname")
   @TestFactory
   Collection<DynamicTest> testValidHostname(){
-    return TestValues.VALID_HOSTNAMES.stream().map(item ->
+    return Stream.concat(TestValues.VALID_HOSTNAMES.stream(), TestValues.VALID_IP_ADDRESSES.stream()).map(item ->
       dynamicTest(item, () ->
         assertDoesNotThrow(() -> assertEquals(item, Validation.assertValidHostname(item))))
     ).collect(Collectors.toList());
@@ -31,7 +32,7 @@ class HostnameValidationTest{
   @DisplayName("Test validating a valid hostname with variable name")
   @TestFactory
   Collection<DynamicTest> testValidHostnameWithVariableName(){
-    return TestValues.VALID_HOSTNAMES.stream().map(item ->
+    return Stream.concat(TestValues.VALID_HOSTNAMES.stream(), TestValues.VALID_IP_ADDRESSES.stream()).map(item ->
       dynamicTest(item, () ->
         assertDoesNotThrow(() -> assertEquals(item, Validation.assertValidHostname(item, "hostname"))))
     ).collect(Collectors.toList());
@@ -41,17 +42,17 @@ class HostnameValidationTest{
   @TestFactory
   Collection<DynamicTest> testInvalidHostname(){
 
-    return TestValues.INVALID_HOSTNAMES.stream().map(item ->
+    return Stream.concat(TestValues.INVALID_HOSTNAMES.stream(), TestValues.INVALID_IP_ADDRESSES.stream()).map(item ->
       dynamicTest(item == null ? "null" : item, () -> {
-          AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
+        AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-          IllegalArgumentException iae = assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-              StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-              ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-              assertEquals(item, Validation.assertValidHostname(item));
-            }
+        IllegalArgumentException iae = assertThrows(
+          IllegalArgumentException.class,
+          () -> {
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            ste.set(Arrays.copyOfRange(stack, 1, stack.length));
+            assertEquals(item, Validation.assertValidHostname(item));
+          }
           );
 
           assertEquals(Bypass.composeMessage(null, Bypass.INVALID_HOSTNAME_MESSAGE), iae.getMessage());
@@ -69,17 +70,17 @@ class HostnameValidationTest{
 
     String variable_name = "hostname";
 
-    return TestValues.INVALID_HOSTNAMES.stream().map(item ->
+    return Stream.concat(TestValues.INVALID_HOSTNAMES.stream(), TestValues.INVALID_IP_ADDRESSES.stream()).map(item ->
       dynamicTest(item == null ? "null" : item, () -> {
-          AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
+        AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-          IllegalArgumentException iae = assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-              StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-              ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-              assertEquals(item, Validation.assertValidHostname(item, variable_name));
-            }
+        IllegalArgumentException iae = assertThrows(
+          IllegalArgumentException.class,
+          () -> {
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            ste.set(Arrays.copyOfRange(stack, 1, stack.length));
+            assertEquals(item, Validation.assertValidHostname(item, variable_name));
+          }
           );
 
           assertEquals(Bypass.composeMessage(variable_name, Bypass.INVALID_HOSTNAME_MESSAGE), iae.getMessage());
@@ -95,17 +96,17 @@ class HostnameValidationTest{
   @TestFactory
   Collection<DynamicTest> testInvalidHostnameWithNullVariableName(){
 
-    return TestValues.INVALID_HOSTNAMES.stream().map(item ->
+    return Stream.concat(TestValues.INVALID_HOSTNAMES.stream(), TestValues.INVALID_IP_ADDRESSES.stream()).map(item ->
       dynamicTest(item, () -> {
-          AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
+        AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-          IllegalArgumentException iae = assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-              StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-              ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-              //noinspection ConstantConditions
-              assertEquals(item, Validation.assertValidHostname(item, null));
+        IllegalArgumentException iae = assertThrows(
+          IllegalArgumentException.class,
+          () -> {
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            ste.set(Arrays.copyOfRange(stack, 1, stack.length));
+            //noinspection ConstantConditions
+            assertEquals(item, Validation.assertValidHostname(item, null));
             }
           );
 
