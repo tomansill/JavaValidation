@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings({"rawtypes", "ConstantConditions"})
+@SuppressWarnings({"ConstantConditions"})
 @DisplayName("Validation Test")
 class ValidationTest{
 
@@ -26,7 +26,7 @@ class ValidationTest{
     return new Gson().fromJson(json, list_type);
   }
 
-  static List<Integer> findNulls(Collection collection){
+  static List<Integer> findNulls(Collection<?> collection) {
     return findNulls(collection.toArray(new Object[0]));
   }
 

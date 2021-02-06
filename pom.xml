@@ -53,9 +53,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <compilerArguments>
-                        <compilerArgument>-Xlint:unchecked</compilerArgument>
-                    </compilerArguments>
+                    <compilerArgs>
+                        <arg>-Xlint:unchecked</arg>
+                    </compilerArgs>
                     <source>8</source>
                     <target>8</target>
                 </configuration>
