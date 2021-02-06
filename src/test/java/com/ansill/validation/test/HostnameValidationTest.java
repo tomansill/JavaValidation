@@ -68,7 +68,7 @@ class HostnameValidationTest{
   @TestFactory
   Collection<DynamicTest> testInvalidHostnameWithVariableName(){
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     return Stream.concat(TestValues.INVALID_HOSTNAMES.stream(), TestValues.INVALID_IP_ADDRESSES.stream()).map(item ->
       dynamicTest(item == null ? "null" : item, () -> {
@@ -79,11 +79,11 @@ class HostnameValidationTest{
           () -> {
             StackTraceElement[] stack = Thread.currentThread().getStackTrace();
             ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-            assertEquals(item, Validation.assertValidHostname(item, variable_name));
+            assertEquals(item, Validation.assertValidHostname(item, variableName));
           }
           );
 
-          assertEquals(Bypass.composeMessage(variable_name, Bypass.INVALID_HOSTNAME_MESSAGE), iae.getMessage());
+        assertEquals(Bypass.composeMessage(variableName, Bypass.INVALID_HOSTNAME_MESSAGE), iae.getMessage());
 
           ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
         }
@@ -110,7 +110,7 @@ class HostnameValidationTest{
             }
           );
 
-          assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+        assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
         }
       )
     ).collect(Collectors.toList());
@@ -143,18 +143,18 @@ class HostnameValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertValidHostname(null, variable_name);
+        Validation.assertValidHostname(null, variableName);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -176,6 +176,6 @@ class HostnameValidationTest{
       }
     );
 
-    assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 }

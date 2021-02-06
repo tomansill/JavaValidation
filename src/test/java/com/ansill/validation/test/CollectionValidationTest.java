@@ -7,11 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,18 +58,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonempty(Collections.emptyList(), variable_name);
+        Validation.assertNonempty(Collections.emptyList(), variableName);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.EMPTY_ARRAY_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.EMPTY_ARRAY_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -106,18 +102,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonempty((Collection<String>) null, variable_name);
+        Validation.assertNonempty((Collection<String>) null, variableName);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -139,7 +135,7 @@ class CollectionValidationTest{
       }
     );
 
-    assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 
   @DisplayName("Test validating a non-empty array")
@@ -185,18 +181,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonempty(new String[]{}, variable_name);
+        Validation.assertNonempty(new String[]{}, variableName);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.EMPTY_ARRAY_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.EMPTY_ARRAY_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -229,18 +225,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonempty((Object[]) null, variable_name);
+        Validation.assertNonempty((Object[]) null, variableName);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -262,7 +258,7 @@ class CollectionValidationTest{
       }
     );
 
-    assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 
   @DisplayName("Test validating a collection without nulls")
@@ -327,20 +323,20 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonnullElements(collection, variable_name, true);
+        Validation.assertNonnullElements(collection, variableName, true);
       }
     );
 
     assertEquals(
       Bypass.composeMessageWithArrays(
-        variable_name,
+        variableName,
         Bypass.NULLS_IN_ARRAY_MESSAGE,
         ValidationTest.findNulls(collection)
       ),
@@ -378,18 +374,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonnullElements(Collections.emptyList(), variable_name, false);
+        Validation.assertNonnullElements(Collections.emptyList(), variableName, false);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.EMPTY_ARRAY_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.EMPTY_ARRAY_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -422,18 +418,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonnullElements((Collection<String>) null, variable_name, true);
+        Validation.assertNonnullElements((Collection<String>) null, variableName, true);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -455,7 +451,7 @@ class CollectionValidationTest{
       }
     );
 
-    assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 
   @DisplayName("Test validating an array without nulls")
@@ -520,20 +516,20 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonnullElements(arrays, variable_name, true);
+        Validation.assertNonnullElements(arrays, variableName, true);
       }
     );
 
     assertEquals(
       Bypass.composeMessageWithArrays(
-        variable_name,
+        variableName,
         Bypass.NULLS_IN_ARRAY_MESSAGE,
         ValidationTest.findNulls(arrays)
       ),
@@ -571,18 +567,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonnullElements(new Object[]{}, variable_name, false);
+        Validation.assertNonnullElements(new Object[]{}, variableName, false);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.EMPTY_ARRAY_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.EMPTY_ARRAY_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -615,18 +611,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonnullElements((Object[]) null, variable_name, true);
+        Validation.assertNonnullElements((Object[]) null, variableName, true);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -648,7 +644,7 @@ class CollectionValidationTest{
       }
     );
 
-    assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 
   @DisplayName("Test validating a set without nulls")
@@ -706,18 +702,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonnullElements(set, variable_name, true);
+        Validation.assertNonnullElements(set, variableName, true);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.NULLS_IN_ARRAY_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.NULLS_IN_ARRAY_MESSAGE), iae.getMessage());
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
   }
@@ -749,18 +745,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonnullElements(Collections.emptySet(), variable_name, false);
+        Validation.assertNonnullElements(Collections.emptySet(), variableName, false);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.EMPTY_ARRAY_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.EMPTY_ARRAY_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -793,18 +789,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonnullElements((Set<String>) null, variable_name, true);
+        Validation.assertNonnullElements((Set<String>) null, variableName, true);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -826,7 +822,7 @@ class CollectionValidationTest{
       }
     );
 
-    assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 
   @DisplayName("Test validating a set (pretending to be a collection) without nulls")
@@ -884,18 +880,18 @@ class CollectionValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonnullElements(collection, variable_name, true);
+        Validation.assertNonnullElements(collection, variableName, true);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.NULLS_IN_ARRAY_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.NULLS_IN_ARRAY_MESSAGE), iae.getMessage());
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
   }

@@ -67,7 +67,7 @@ class EmailAddressValidationTest{
   @TestFactory
   Collection<DynamicTest> testInvalidEmailAddressWithVariableName(){
 
-    String variable_name = "email_address";
+    String variableName = "email_address";
 
     return TestValues.INVALID_EMAIL_ADDRESSES.stream().map(item ->
       dynamicTest(item == null ? "null" : item, () -> {
@@ -78,11 +78,11 @@ class EmailAddressValidationTest{
             () -> {
               StackTraceElement[] stack = Thread.currentThread().getStackTrace();
               ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-              assertEquals(item, Validation.assertValidEmailAddress(item, variable_name));
+              assertEquals(item, Validation.assertValidEmailAddress(item, variableName));
             }
           );
 
-          assertEquals(Bypass.composeMessage(variable_name, Bypass.INVALID_EMAIL_MESSAGE), iae.getMessage());
+        assertEquals(Bypass.composeMessage(variableName, Bypass.INVALID_EMAIL_MESSAGE), iae.getMessage());
 
           ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
         }
@@ -109,7 +109,7 @@ class EmailAddressValidationTest{
             }
           );
 
-          assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+        assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
         }
       )
     ).collect(Collectors.toList());
@@ -142,18 +142,18 @@ class EmailAddressValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "email_address";
+    String variableName = "email_address";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertValidEmailAddress(null, variable_name);
+        Validation.assertValidEmailAddress(null, variableName);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -175,6 +175,6 @@ class EmailAddressValidationTest{
       }
     );
 
-    assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 }

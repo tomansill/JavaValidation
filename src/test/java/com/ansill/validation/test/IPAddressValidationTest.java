@@ -67,7 +67,7 @@ class IPAddressValidationTest{
   @TestFactory
   Collection<DynamicTest> testInvalidIPAddressWithVariableName(){
 
-    String variable_name = "IPAddress";
+    String variableName = "IPAddress";
 
     return TestValues.INVALID_IP_ADDRESSES.stream().map(item ->
       dynamicTest(item == null ? "null" : item, () -> {
@@ -78,11 +78,11 @@ class IPAddressValidationTest{
             () -> {
               StackTraceElement[] stack = Thread.currentThread().getStackTrace();
               ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-              assertEquals(item, Validation.assertValidIPAddress(item, variable_name));
+              assertEquals(item, Validation.assertValidIPAddress(item, variableName));
             }
           );
 
-          assertEquals(Bypass.composeMessage(variable_name, Bypass.INVALID_IP_MESSAGE), iae.getMessage());
+        assertEquals(Bypass.composeMessage(variableName, Bypass.INVALID_IP_MESSAGE), iae.getMessage());
 
           ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
         }
@@ -109,7 +109,7 @@ class IPAddressValidationTest{
             }
           );
 
-          assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+        assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
         }
       )
     ).collect(Collectors.toList());
@@ -142,18 +142,18 @@ class IPAddressValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "IPAddress";
+    String variableName = "IPAddress";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertValidIPAddress(null, variable_name);
+        Validation.assertValidIPAddress(null, variableName);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -175,6 +175,6 @@ class IPAddressValidationTest{
       }
     );
 
-    assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 }

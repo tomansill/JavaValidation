@@ -86,18 +86,18 @@ class ValidationTest{
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
-    String variable_name = "hostname";
+    String variableName = "hostname";
 
     IllegalArgumentException iae = assertThrows(
       IllegalArgumentException.class,
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        Validation.assertNonnull(null, variable_name);
+        Validation.assertNonnull(null, variableName);
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
 
     assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -118,7 +118,7 @@ class ValidationTest{
       }
     );
 
-    assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 
 }

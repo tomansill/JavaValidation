@@ -60,7 +60,7 @@ class PortNumberValidationTest{
   @ValueSource(strings = {"0", "-1231", "3523523"})
   void testInvalidPortNumberWithVariableName(String port){
     int portnum = Integer.parseInt(port);
-    String variable_name = "port_number";
+    String variableName = "port_number";
 
     AtomicReference<StackTraceElement[]> ste = new AtomicReference<>();
 
@@ -69,11 +69,11 @@ class PortNumberValidationTest{
       () -> {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         ste.set(Arrays.copyOfRange(stack, 1, stack.length));
-        assertEquals(portnum, Validation.assertValidPortNumber(portnum, variable_name));
+        assertEquals(portnum, Validation.assertValidPortNumber(portnum, variableName));
       }
     );
 
-    assertEquals(Bypass.composeMessage(variable_name, Bypass.INVALID_PORT_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage(variableName, Bypass.INVALID_PORT_MESSAGE), iae.getMessage());
 
     ValidationTest.assertStackTrace(ste.get()[0], iae.getStackTrace()[0], 2);
 
@@ -97,6 +97,6 @@ class PortNumberValidationTest{
       }
     );
 
-    assertEquals(Bypass.composeMessage("variable_name", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
+    assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 }
