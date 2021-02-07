@@ -7,10 +7,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Validation Test for Collection")
 class CollectionValidationTest{
@@ -261,10 +269,21 @@ class CollectionValidationTest{
     assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 
+  @DisplayName("Test boolean validating a collection without nulls")
+  @ParameterizedTest
+  @ValueSource(strings = {"['something', 'else']", "['something']", "[]"})
+  void testCheckCollectionWithoutNulls(String parameters) {
+
+    Collection<String> collection = ValidationTest.convertJson(parameters.replaceAll("'", "\""));
+
+    assertTrue(Validation.hasAllNonnullElements(collection, true));
+
+  }
+
   @DisplayName("Test validating a collection without nulls")
   @ParameterizedTest
   @ValueSource(strings = {"['something', 'else']", "['something']", "[]"})
-  void testCollectionWithoutNulls(String parameters){
+  void testCollectionWithoutNulls(String parameters) {
 
     Collection<String> collection = ValidationTest.convertJson(parameters.replaceAll("'", "\""));
 
@@ -275,7 +294,7 @@ class CollectionValidationTest{
   @DisplayName("Test validating a collection without nulls")
   @ParameterizedTest
   @ValueSource(strings = {"['something', 'else']", "['something']", "[]"})
-  void testCollectionWithoutNullsWithVariableName(String parameters){
+  void testCollectionWithoutNullsWithVariableName(String parameters) {
 
     Collection<String> collection = ValidationTest.convertJson(parameters.replaceAll("'", "\""));
 
@@ -283,10 +302,21 @@ class CollectionValidationTest{
 
   }
 
+  @DisplayName("Test boolean validating a collection with nulls")
+  @ParameterizedTest
+  @ValueSource(strings = {"['something', null, 'hello']", "[null]", "[null, null, 'hello']"})
+  void testCheckCollectionWithNulls(String parameters) {
+
+    Collection<String> collection = ValidationTest.convertJson(parameters.replaceAll("'", "\""));
+
+    assertFalse(Validation.hasAllNonnullElements(collection, true));
+
+  }
+
   @DisplayName("Test validating a collection with nulls")
   @ParameterizedTest
   @ValueSource(strings = {"['something', null, 'hello']", "[null]", "[null, null, 'hello']"})
-  void testCollectionWithNulls(String parameters){
+  void testCollectionWithNulls(String parameters) {
 
     Collection<String> collection = ValidationTest.convertJson(parameters.replaceAll("'", "\""));
 
@@ -454,10 +484,21 @@ class CollectionValidationTest{
     assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 
+  @DisplayName("Test boolean validating an array without nulls")
+  @ParameterizedTest
+  @ValueSource(strings = {"['something', 'else']", "['something']", "[]"})
+  void testCheckArrayWithoutNulls(String parameters) {
+
+    String[] arrays = ValidationTest.convertJson(parameters.replaceAll("'", "\"")).toArray(new String[0]);
+
+    assertTrue(Validation.hasAllNonnullElements(arrays, true));
+
+  }
+
   @DisplayName("Test validating an array without nulls")
   @ParameterizedTest
   @ValueSource(strings = {"['something', 'else']", "['something']", "[]"})
-  void testArrayWithoutNulls(String parameters){
+  void testArrayWithoutNulls(String parameters) {
 
     String[] arrays = ValidationTest.convertJson(parameters.replaceAll("'", "\"")).toArray(new String[0]);
 
@@ -468,7 +509,7 @@ class CollectionValidationTest{
   @DisplayName("Test validating an array without nulls")
   @ParameterizedTest
   @ValueSource(strings = {"['something', 'else']", "['something']", "[]"})
-  void testArrayWithoutNullsWithVariableName(String parameters){
+  void testArrayWithoutNullsWithVariableName(String parameters) {
 
     String[] arrays = ValidationTest.convertJson(parameters.replaceAll("'", "\"")).toArray(new String[0]);
 
@@ -476,10 +517,21 @@ class CollectionValidationTest{
 
   }
 
+  @DisplayName("Test boolean validating an array with nulls")
+  @ParameterizedTest
+  @ValueSource(strings = {"['something', null, 'hello']", "[null]", "[null, null, 'hello']"})
+  void testCheckArrayWithNulls(String parameters) {
+
+    String[] arrays = ValidationTest.convertJson(parameters.replaceAll("'", "\"")).toArray(new String[0]);
+
+    assertFalse(Validation.hasAllNonnullElements(arrays, true));
+
+  }
+
   @DisplayName("Test validating an array with nulls")
   @ParameterizedTest
   @ValueSource(strings = {"['something', null, 'hello']", "[null]", "[null, null, 'hello']"})
-  void testArrayWithNulls(String parameters){
+  void testArrayWithNulls(String parameters) {
 
     String[] arrays = ValidationTest.convertJson(parameters.replaceAll("'", "\"")).toArray(new String[0]);
 
@@ -647,10 +699,21 @@ class CollectionValidationTest{
     assertEquals(Bypass.composeMessage("variableName", Bypass.OBJECT_NULL_MESSAGE), iae.getMessage());
   }
 
+  @DisplayName("Test boolean validating a set without nulls")
+  @ParameterizedTest
+  @ValueSource(strings = {"['something', 'else']", "['something']", "[]"})
+  void testCheckSetWithoutNulls(String parameters) {
+
+    Set<String> set = new HashSet<>(ValidationTest.convertJson(parameters.replaceAll("'", "\"")));
+
+    assertTrue(Validation.hasAllNonnullElements(set, true));
+
+  }
+
   @DisplayName("Test validating a set without nulls")
   @ParameterizedTest
   @ValueSource(strings = {"['something', 'else']", "['something']", "[]"})
-  void testSetWithoutNulls(String parameters){
+  void testSetWithoutNulls(String parameters) {
 
     Set<String> set = new HashSet<>(ValidationTest.convertJson(parameters.replaceAll("'", "\"")));
 
@@ -661,7 +724,7 @@ class CollectionValidationTest{
   @DisplayName("Test validating a set without nulls")
   @ParameterizedTest
   @ValueSource(strings = {"['something', 'else']", "['something']", "[]"})
-  void testSetWithoutNullsWithVariableName(String parameters){
+  void testSetWithoutNullsWithVariableName(String parameters) {
 
     Set<String> set = new HashSet<>(ValidationTest.convertJson(parameters.replaceAll("'", "\"")));
 
@@ -669,10 +732,20 @@ class CollectionValidationTest{
 
   }
 
+  @DisplayName("Test boolean validating a set with nulls")
+  @ParameterizedTest
+  @ValueSource(strings = {"['something', null, 'hello']", "[null]", "[null, null, 'hello']"})
+  void testCheckSetWithNulls(String parameters) {
+
+    Set<String> set = new HashSet<>(ValidationTest.convertJson(parameters.replaceAll("'", "\"")));
+
+    assertFalse(Validation.hasAllNonnullElements(set, true));
+  }
+
   @DisplayName("Test validating a set with nulls")
   @ParameterizedTest
   @ValueSource(strings = {"['something', null, 'hello']", "[null]", "[null, null, 'hello']"})
-  void testSetWithNulls(String parameters){
+  void testSetWithNulls(String parameters) {
 
     Set<String> set = new HashSet<>(ValidationTest.convertJson(parameters.replaceAll("'", "\"")));
 

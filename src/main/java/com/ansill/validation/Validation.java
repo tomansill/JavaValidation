@@ -94,13 +94,6 @@ public final class Validation {
 	static final String NULLS_IN_ARRAY_MESSAGE = "is expected to have all of its list members to be non-null but the list contains null members";
 
 	/**
-	 * Regex pattern for valid hostname
-	 */
-	@Nonnull
-	private static final Pattern VALID_HOSTNAME_REGEX = Pattern.compile(
-		"^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$");
-
-	/**
 	 * Regex pattern for valid IPv4 address
 	 */
 	@Nonnull
@@ -221,7 +214,12 @@ public final class Validation {
 		throw updateStackTrace(iae, 0);
 	}
 
-	// TODO docs
+	/**
+	 * Determines whether given number is a valid port number
+	 *
+	 * @param port possibly valid port number
+	 * @return true if valid, otherwise false
+	 */
 	public static boolean isPortNumberValid(int port) {
 
 		// Return result
@@ -283,7 +281,12 @@ public final class Validation {
 		throw updateStackTrace(iae, 0);
 	}
 
-	// TODO docs
+	/**
+	 * Returns whether if input hostname is a valid hostname (including valid ip address)
+	 *
+	 * @param hostname input hostname to be validated
+	 * @return true if valid, otherwise false
+	 */
 	public static boolean isHostnameValid(@Nullable String hostname) {
 
 		// Return false if null
@@ -395,7 +398,12 @@ public final class Validation {
 		throw updateStackTrace(iae, 0);
 	}
 
-	// TODO docs
+	/**
+	 * Checks the provided string if it's a valid IPv4 or IPv6 address
+	 *
+	 * @param address address
+	 * @return true if valid, otherwise false
+	 */
 	public static boolean isIPAddressValid(@Nullable String address) {
 
 		// Return false if null
@@ -521,7 +529,12 @@ public final class Validation {
 		return true;
 	}
 
-	// TODO docs
+	/**
+	 * Checks if string for local part of email address is valid
+	 *
+	 * @param recipient local part
+	 * @return true if valid, otherwise false
+	 */
 	private static boolean checkEmailAddressLocalPart(@Nonnull String recipient) {
 
 		// Check if blank
@@ -591,8 +604,13 @@ public final class Validation {
 		return !quoted;
 	}
 
-	// TODO docs
-	// http://rumkin.com/software/email/rules.php
+	/**
+	 * Checks if provided email address is valid
+	 *
+	 * @param emailAddress provided email address
+	 * @return true if valid, otherwise false
+	 */
+	// http://rumkin.com/software/email/rules.php // slightly old as international characters are allowed now
 	public static boolean isEmailAddressValid(@Nullable String emailAddress) {
 
 		// Null check
@@ -621,7 +639,12 @@ public final class Validation {
 		return checkEmailHostnamePart(second);
 	}
 
-	// TODO docs
+	/**
+	 * Checks if hostname part of email address is valid
+	 *
+	 * @param hostname hostname
+	 * @return true if valid, otherwise false
+	 */
 	private static boolean checkEmailHostnamePart(@Nonnull String hostname) {
 
 		// If hostname is valid, then shortcut
@@ -708,7 +731,61 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static int assertGreaterThan(int number, long compare) throws IllegalArgumentException {
+	public static byte assertGreaterThan(byte number, double compare) throws IllegalArgumentException {
+		return (byte) innerAssertGreaterThan(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static byte assertGreaterThan(byte number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (byte) innerAssertGreaterThan(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static short assertGreaterThan(short number, double compare) throws IllegalArgumentException {
+		return (short) innerAssertGreaterThan(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static short assertGreaterThan(short number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (short) innerAssertGreaterThan(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static int assertGreaterThan(int number, double compare) throws IllegalArgumentException {
 		return (int) innerAssertGreaterThan(number, compare, null);
 	}
 
@@ -721,7 +798,7 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static int assertGreaterThan(int number, long compare, @Nonnull String variableName)
+	public static int assertGreaterThan(int number, double compare, @Nonnull String variableName)
 		throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
 		return (int) innerAssertGreaterThan(number, compare, variableName);
@@ -735,7 +812,61 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static long assertGreaterThan(long number, long compare) throws IllegalArgumentException {
+	public static long assertGreaterThan(long number, double compare) throws IllegalArgumentException {
+		return (long) innerAssertGreaterThan(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static long assertGreaterThan(long number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (long) innerAssertGreaterThan(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static float assertGreaterThan(float number, double compare) throws IllegalArgumentException {
+		return (float) innerAssertGreaterThan(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static float assertGreaterThan(float number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (float) innerAssertGreaterThan(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a greater than compared number. If it is not a greater an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static double assertGreaterThan(double number, double compare) throws IllegalArgumentException {
 		return innerAssertGreaterThan(number, compare, null);
 	}
 
@@ -748,7 +879,7 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static long assertGreaterThan(long number, long compare, @Nonnull String variableName)
+	public static double assertGreaterThan(double number, double compare, @Nonnull String variableName)
 		throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
 		return innerAssertGreaterThan(number, compare, variableName);
@@ -763,7 +894,7 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	private static long innerAssertGreaterThan(long number, long compare, @Nullable String variableName)
+	private static double innerAssertGreaterThan(double number, double compare, @Nullable String variableName)
 		throws IllegalArgumentException {
 
 		// Exit if not null
@@ -787,7 +918,61 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static int assertLesserThan(int number, long compare) throws IllegalArgumentException {
+	public static byte assertLesserThan(byte number, double compare) throws IllegalArgumentException {
+		return (byte) innerAssertLesserThan(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static byte assertLesserThan(byte number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (byte) innerAssertLesserThan(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static short assertLesserThan(short number, double compare) throws IllegalArgumentException {
+		return (short) innerAssertLesserThan(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static short assertLesserThan(short number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (short) innerAssertLesserThan(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static int assertLesserThan(int number, double compare) throws IllegalArgumentException {
 		return (int) innerAssertLesserThan(number, compare, null);
 	}
 
@@ -800,7 +985,7 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static int assertLesserThan(int number, long compare, @Nonnull String variableName)
+	public static int assertLesserThan(int number, double compare, @Nonnull String variableName)
 		throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
 		return (int) innerAssertLesserThan(number, compare, variableName);
@@ -814,7 +999,61 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static long assertLesserThan(long number, long compare) throws IllegalArgumentException {
+	public static long assertLesserThan(long number, double compare) throws IllegalArgumentException {
+		return (long) innerAssertLesserThan(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static long assertLesserThan(long number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (long) innerAssertLesserThan(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static float assertLesserThan(float number, double compare) throws IllegalArgumentException {
+		return (float) innerAssertLesserThan(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static float assertLesserThan(float number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (float) innerAssertLesserThan(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a lesser than compared number. If it is not a lesser an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static double assertLesserThan(double number, double compare) throws IllegalArgumentException {
 		return innerAssertLesserThan(number, compare, null);
 	}
 
@@ -827,12 +1066,11 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static long assertLesserThan(long number, long compare, @Nonnull String variableName)
+	public static double assertLesserThan(double number, double compare, @Nonnull String variableName)
 		throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
 		return innerAssertLesserThan(number, compare, variableName);
 	}
-
 
 	/**
 	 * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
@@ -842,7 +1080,61 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static int assertGreaterThanOrEqual(int number, long compare) throws IllegalArgumentException {
+	public static byte assertGreaterThanOrEqual(byte number, double compare) throws IllegalArgumentException {
+		return (byte) innerAssertGreaterThanOrEqual(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static byte assertGreaterThanOrEqual(byte number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (byte) innerAssertGreaterThanOrEqual(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static short assertGreaterThanOrEqual(short number, double compare) throws IllegalArgumentException {
+		return (short) innerAssertGreaterThanOrEqual(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static short assertGreaterThanOrEqual(short number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (short) innerAssertGreaterThanOrEqual(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static int assertGreaterThanOrEqual(int number, double compare) throws IllegalArgumentException {
 		return (int) innerAssertGreaterThanOrEqual(number, compare, null);
 	}
 
@@ -855,7 +1147,7 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static int assertGreaterThanOrEqual(int number, long compare, @Nonnull String variableName)
+	public static int assertGreaterThanOrEqual(int number, double compare, @Nonnull String variableName)
 		throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
 		return (int) innerAssertGreaterThanOrEqual(number, compare, variableName);
@@ -869,7 +1161,61 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static long assertGreaterThanOrEqual(long number, long compare) throws IllegalArgumentException {
+	public static long assertGreaterThanOrEqual(long number, double compare) throws IllegalArgumentException {
+		return (long) innerAssertGreaterThanOrEqual(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static long assertGreaterThanOrEqual(long number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (long) innerAssertGreaterThanOrEqual(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static float assertGreaterThanOrEqual(float number, double compare) throws IllegalArgumentException {
+		return (float) innerAssertGreaterThanOrEqual(number, compare, null);
+	}
+
+	/**
+	 * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+	 *
+	 * @param number       number to be asserted
+	 * @param compare      number being compared
+	 * @param variableName name of variable
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static float assertGreaterThanOrEqual(float number, double compare, @Nonnull String variableName)
+		throws IllegalArgumentException {
+		assertNonnull(variableName, "variableName");
+		return (float) innerAssertGreaterThanOrEqual(number, compare, variableName);
+	}
+
+	/**
+	 * Asserts that number is a greater than or equals to compared number. If it is not greater or equal, an exception will be thrown.
+	 *
+	 * @param number  number to be asserted
+	 * @param compare number being compared
+	 * @return valid number
+	 * @throws IllegalArgumentException thrown if the number is invalid in any way
+	 */
+	public static double assertGreaterThanOrEqual(double number, double compare) throws IllegalArgumentException {
 		return innerAssertGreaterThanOrEqual(number, compare, null);
 	}
 
@@ -882,7 +1228,7 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	public static long assertGreaterThanOrEqual(long number, long compare, @Nonnull String variableName)
+	public static double assertGreaterThanOrEqual(double number, double compare, @Nonnull String variableName)
 		throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
 		return innerAssertGreaterThanOrEqual(number, compare, variableName);
@@ -897,7 +1243,7 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	private static long innerAssertGreaterThanOrEqual(long number, long compare, @Nullable String variableName)
+	private static double innerAssertGreaterThanOrEqual(double number, double compare, @Nullable String variableName)
 		throws IllegalArgumentException {
 
 		// Exit if not null
@@ -922,7 +1268,7 @@ public final class Validation {
 	 * @return valid number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
-	private static long innerAssertLesserThan(long number, long compare, @Nullable String variableName)
+	private static double innerAssertLesserThan(double number, double compare, @Nullable String variableName)
 		throws IllegalArgumentException {
 
 		// Exit if not null
@@ -942,9 +1288,10 @@ public final class Validation {
 	 * Asserts that number is a natural number. If it is not a natural number, then an exception will be thrown.
 	 *
 	 * @param number number to be asserted
-	 * @return valid nonnegative number
+	 * @return valid natural number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
+	@Nonnegative
 	public static int assertNaturalNumber(int number) throws IllegalArgumentException {
 		return (int) innerAssertNaturalNumber(number, null);
 	}
@@ -954,9 +1301,10 @@ public final class Validation {
 	 *
 	 * @param number       number to be asserted
 	 * @param variableName name of variable
-	 * @return valid nonnegative number
+	 * @return valid natural number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
+	@Nonnegative
 	public static int assertNaturalNumber(int number, @Nonnull String variableName) throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
 		return (int) innerAssertNaturalNumber(number, variableName);
@@ -966,9 +1314,10 @@ public final class Validation {
 	 * Asserts that number is a natural number. If it is not a natural number, then an exception will be thrown.
 	 *
 	 * @param number number to be asserted
-	 * @return valid nonnegative number
+	 * @return valid natural number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
+	@Nonnegative
 	public static long assertNaturalNumber(long number) throws IllegalArgumentException {
 		return innerAssertNaturalNumber(number, null);
 	}
@@ -978,9 +1327,10 @@ public final class Validation {
 	 *
 	 * @param number       number to be asserted
 	 * @param variableName name of variable
-	 * @return valid nonnegative number
+	 * @return valid natural number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
+	@Nonnegative
 	public static long assertNaturalNumber(long number, @Nonnull String variableName) throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
 		return innerAssertNaturalNumber(number, variableName);
@@ -994,6 +1344,7 @@ public final class Validation {
 	 * @return valid natural number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
+	@Nonnegative
 	private static long innerAssertNaturalNumber(long number, @Nullable String variableName)
 		throws IllegalArgumentException {
 
@@ -1017,6 +1368,7 @@ public final class Validation {
 	 * @return valid nonnegative number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
+	@Nonnegative
 	public static long assertNonnegative(long number) throws IllegalArgumentException {
 		return innerAssertNonnegative(number, null);
 	}
@@ -1029,6 +1381,7 @@ public final class Validation {
 	 * @return valid nonnegative number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
+	@Nonnegative
 	public static long assertNonnegative(long number, @Nonnull String variableName) throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
 		return innerAssertNonnegative(number, variableName);
@@ -1042,6 +1395,7 @@ public final class Validation {
 	 * @return valid nonnegative number
 	 * @throws IllegalArgumentException thrown if the number is invalid in any way
 	 */
+	@Nonnegative
 	private static long innerAssertNonnegative(long number, @Nullable String variableName)
 		throws IllegalArgumentException {
 
@@ -1066,6 +1420,7 @@ public final class Validation {
 	 * @return valid nonempty string
 	 * @throws IllegalArgumentException thrown if the string is invalid in any way
 	 */
+	@Nonnull
 	public static String assertNonemptyString(@Nullable String string) throws IllegalArgumentException {
 		return innerAssertNonemptyString(string, null, 0);
 	}
@@ -1079,6 +1434,7 @@ public final class Validation {
 	 * @return valid nonempty string
 	 * @throws IllegalArgumentException thrown if the string is invalid in any way
 	 */
+	@Nonnull
 	public static String assertNonemptyString(@Nullable String string, @Nonnull String variableName)
 		throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
@@ -1095,6 +1451,7 @@ public final class Validation {
 	 * @return valid nonempty string
 	 * @throws IllegalArgumentException thrown if the string is invalid in any way
 	 */
+	@Nonnull
 	private static String innerAssertNonemptyString(
 		@Nullable String string,
 		@Nullable String variableName,
@@ -1125,6 +1482,7 @@ public final class Validation {
 	 * @return valid nonempty collection
 	 * @throws IllegalArgumentException thrown if the collection is invalid in any way
 	 */
+	@Nonnull
 	public static <T> Collection<T> assertNonempty(@Nullable Collection<T> collection) throws IllegalArgumentException {
 		return innerAssertNonempty(collection, null, 0);
 	}
@@ -1138,6 +1496,7 @@ public final class Validation {
 	 * @return valid nonempty collection
 	 * @throws IllegalArgumentException thrown if the collection is invalid in any way
 	 */
+	@Nonnull
 	public static <T> Collection<T> assertNonempty(@Nullable Collection<T> collection, @Nonnull String variableName)
 		throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
@@ -1154,6 +1513,7 @@ public final class Validation {
 	 * @return valid nonempty collection
 	 * @throws IllegalArgumentException thrown if the collection is invalid in any way
 	 */
+	@Nonnull
 	private static <T> Collection<T> innerAssertNonempty(
 		@Nullable Collection<T> collection,
 		@Nullable String variableName,
@@ -1179,6 +1539,7 @@ public final class Validation {
 	 * @return valid nonempty array
 	 * @throws IllegalArgumentException thrown if the array is invalid in any way
 	 */
+	@Nonnull
 	public static <T> T[] assertNonempty(@Nullable T[] array) throws IllegalArgumentException {
 		return innerAssertNonempty(array, null, 0);
 	}
@@ -1192,6 +1553,7 @@ public final class Validation {
 	 * @return valid nonempty array
 	 * @throws IllegalArgumentException thrown if the array is invalid in any way
 	 */
+	@Nonnull
 	public static <T> T[] assertNonempty(@Nullable T[] array, @Nonnull String variableName)
 		throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
@@ -1208,6 +1570,7 @@ public final class Validation {
 	 * @return valid nonempty array
 	 * @throws IllegalArgumentException thrown if the array is invalid in any way
 	 */
+	@Nonnull
 	private static <T> T[] innerAssertNonempty(@Nullable T[] array, @Nullable String variableName, int level)
 		throws IllegalArgumentException {
 
@@ -1237,6 +1600,7 @@ public final class Validation {
 	 * @return valid nonnull set
 	 * @throws IllegalArgumentException thrown if the set is invalid in any way
 	 */
+	@Nonnull
 	public static <T> Set<T> assertNonnullElements(@Nullable Set<T> set, boolean emptyAllowed)
 		throws IllegalArgumentException {
 		return innerAssertNonnullElements(set, null, emptyAllowed);
@@ -1253,6 +1617,7 @@ public final class Validation {
 	 * @return valid nonnull set
 	 * @throws IllegalArgumentException thrown if the set is invalid in any way
 	 */
+	@Nonnull
 	public static <T> Set<T> assertNonnullElements(
 		@Nullable Set<T> set,
 		@Nonnull String variableName,
@@ -1267,13 +1632,14 @@ public final class Validation {
 	 * Asserts that set does not contain any null elements. If it does contain null elements, then an exception will be thrown.
 	 * Additionally, it can assert if set is non-empty if requested.
 	 *
-	 * @param <T>           type of array
-	 * @param set           set to be asserted
-	 * @param variableName  name of variable
+	 * @param <T>          type of array
+	 * @param set          set to be asserted
+	 * @param variableName name of variable
 	 * @param emptyAllowed true to allow an empty set, false to assert a non-empty set
 	 * @return valid nonnull set
 	 * @throws IllegalArgumentException thrown if the set is invalid in any way
 	 */
+	@Nonnull
 	private static <T> Set<T> innerAssertNonnullElements(
 		@Nullable Set<T> set,
 		@Nullable String variableName,
@@ -1287,7 +1653,7 @@ public final class Validation {
 		if (!emptyAllowed) innerAssertNonempty(set, variableName, 1);
 
 		// Check for any nulls
-		if (!set.contains(null)) return set;
+		if (hasAllNonnullElements(set, emptyAllowed)) return set;
 
 		// Otherwise go ahead and throw exception
 		String message = composeMessage(variableName, NULLS_IN_ARRAY_MESSAGE);
@@ -1299,8 +1665,15 @@ public final class Validation {
 		throw updateStackTrace(iae, 0);
 	}
 
-	// TODO docs
-	public static boolean containsNonnullElements(@Nullable Set<?> set, boolean emptyAllowed) {
+	/**
+	 * Asserts that set does not contain any null elements. If it does contain null elements, then an exception will be thrown.
+	 * Additionally, it can check if set is non-empty if requested.
+	 *
+	 * @param set          set to be asserted
+	 * @param emptyAllowed true to allow an empty set, false to fail a non-empty set
+	 * @return true if satisfied with the expectation, false if not
+	 */
+	public static boolean hasAllNonnullElements(@Nullable Set<?> set, boolean emptyAllowed) {
 
 		// Assert non null
 		if (set == null) return false;
@@ -1312,8 +1685,15 @@ public final class Validation {
 		return !set.contains(null);
 	}
 
-	// TODO docs
-	public static boolean containsNonnullElements(@Nullable Object[] array, boolean emptyAllowed) {
+	/**
+	 * Asserts that array does not contain any null elements. If it does contain null elements, then an exception will be thrown.
+	 * Additionally, it can check if array is non-empty if requested.
+	 *
+	 * @param array        array to be asserted
+	 * @param emptyAllowed true to allow an empty array, false to fail a non-empty array
+	 * @return true if satisfied with the expectation, false if not
+	 */
+	public static boolean hasAllNonnullElements(@Nullable Object[] array, boolean emptyAllowed) {
 
 		// Assert non null
 		if (array == null) return false;
@@ -1325,8 +1705,15 @@ public final class Validation {
 		return Arrays.stream(array).noneMatch(Objects::isNull);
 	}
 
-	// TODO docs
-	public static boolean containsNonnullElements(@Nullable Collection<?> collection, boolean emptyAllowed) {
+	/**
+	 * Asserts that collection does not contain any null elements. If it does contain null elements, then an exception will be thrown.
+	 * Additionally, it can check if collection is non-empty if requested.
+	 *
+	 * @param collection           collection to be asserted
+	 * @param emptyAllowed true to allow an empty collection, false to fail a non-empty collection
+	 * @return true if satisfied with the expectation, false if not
+	 */
+	public static boolean hasAllNonnullElements(@Nullable Collection<?> collection, boolean emptyAllowed) {
 
 		// Assert non null
 		if (collection == null) return false;
@@ -1348,6 +1735,7 @@ public final class Validation {
 	 * @return valid nonnull collection
 	 * @throws IllegalArgumentException thrown if the collection is invalid in any way
 	 */
+	@Nonnull
 	public static <T> Collection<T> assertNonnullElements(@Nullable Collection<T> collection, boolean emptyAllowed)
 		throws IllegalArgumentException {
 		if (collection instanceof Set) return innerAssertNonnullElements((Set<T>) collection, null, emptyAllowed);
@@ -1358,13 +1746,14 @@ public final class Validation {
 	 * Asserts that collection does not contain any null elements. If it does contain null elements, then an exception will be thrown.
 	 * Additionally, it can assert if collection is non-empty if requested.
 	 *
-	 * @param <T>           type of array
-	 * @param collection    collection to be asserted
-	 * @param variableName  name of variable
+	 * @param <T>          type of array
+	 * @param collection   collection to be asserted
+	 * @param variableName name of variable
 	 * @param emptyAllowed true to allow an empty collection, false to assert a non-empty collection
 	 * @return valid nonnull collection
 	 * @throws IllegalArgumentException thrown if the collection is invalid in any way
 	 */
+	@Nonnull
 	public static <T> Collection<T> assertNonnullElements(
 		@Nullable Collection<T> collection,
 		@Nonnull String variableName,
@@ -1387,6 +1776,7 @@ public final class Validation {
 	 * @return valid nonnull collection
 	 * @throws IllegalArgumentException thrown if the collection is invalid in any way
 	 */
+	@Nonnull
 	private static <T> Collection<T> innerAssertNonnullElements(
 		@Nullable Collection<T> collection,
 		@Nullable String variableName,
@@ -1413,6 +1803,7 @@ public final class Validation {
 	 * @return valid nonnull array
 	 * @throws IllegalArgumentException thrown if the array is invalid in any way
 	 */
+	@Nonnull
 	public static <T> T[] assertNonnullElements(@Nullable T[] array, boolean emptyAllowed)
 		throws IllegalArgumentException {
 		return innerAssertNonnullElements(array, null, emptyAllowed, 0);
@@ -1429,6 +1820,7 @@ public final class Validation {
 	 * @return valid nonnull array
 	 * @throws IllegalArgumentException thrown if the array is invalid in any way
 	 */
+	@Nonnull
 	public static <T> T[] assertNonnullElements(
 		@Nullable T[] array,
 		@Nonnull String variableName,
