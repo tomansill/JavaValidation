@@ -10,8 +10,34 @@ public class TestValues{
     "cloudflare.com",
     "foo.bar.something.lse.com",
     "192.192.129.112",
+    "domain.with.idn.tld.उदाहरण.परीक्षा",
+    //"\uD83D\uDE09.tld", // Figure this out later
     "192.192.129", // Technically valid since it's not IP address, but just a strange FQDN
     "something.else"
+  ));
+
+  public static final HashSet<String> VALID_TLD = new HashSet<>(Arrays.asList(
+    "com",
+    "net",
+    "amazon",
+    "セール",
+    "WEIOFOWIFMW",
+    "米",
+    "北部湾",
+    "娱乐",
+    "उदाहरण",
+    "परीक्षा"
+  ));
+
+  public static final HashSet<String> INVALID_TLD = new HashSet<>(Arrays.asList(
+    "  fwaf",
+    "--wwf--",
+    "$wf#",
+    "娱##@@乐",
+    "",
+    "   ",
+    "3200())",
+    "com*"
   ));
 
   public static final HashSet<String> INVALID_HOSTNAMES = new HashSet<>(Arrays.asList(
@@ -19,6 +45,7 @@ public class TestValues{
     "google.$$#com",
     "cloudf##@lare.com",
     "foo.ba$$#r.something.lse.com",
+    "go--ogle.com",
     "192.192.12#$9.112"
   ));
 
@@ -64,7 +91,8 @@ public class TestValues{
     "email@example.name",
     "email@example.museum",
     "email@example.co.jp",
-    "firstname-lastname@example.com"
+    "firstname-lastname@example.com",
+    "test@domain.with.idn.tld.उदाहरण.परीक्षा"
     //"much.“more\\ unusual”@example.com",
     //"very.unusual.“@”.unusual.com@example.com",
     //"very.“(),:;<>[]”.VERY.“very@\\\\ \"very”.unusual@strange.example.com"
@@ -80,7 +108,6 @@ public class TestValues{
     ".email@example.com",
     //"email.@example.com", // How is this invalid?
     "email..email@example.com",
-    "あいうえお@example.com",
     "email@example.com (Joe Smith)",
     "email@example",
     "email@-example.com",

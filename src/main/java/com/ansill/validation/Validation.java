@@ -4,8 +4,11 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.net.IDN;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -112,11 +115,20 @@ public final class Validation {
 		"(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))");
 
 	/**
-	 * Regex pattern for valid email address
+	 * Set of allowed characters for local part in email
 	 */
 	@Nonnull
-	private static final Pattern VALID_EMAIL_REGEX = Pattern.compile(
-		"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])");
+	private static final Set<Character> EMAIL_LOCAL_ALLOWED_SPECIAL_CHARS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		'!', '#', '$', '%', '&', '\'', '*', '+', '-', '/', '=', '?', '^', '_', '`', '{', '|', '}', '~'
+	)));
+
+	/**
+	 * Set of allowed characters for local part in email
+	 */
+	@Nonnull
+	private static final Set<Character> EMAIL_LOCAL_ALLOWED_SPECIAL_CHARS_WITH_ESCAPE = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+		'\t', '[', '\\', '^', (char) 13, (char) 10, '\"'
+	)));
 
 	private Validation() {
 		// Prevents any instantiation
@@ -197,7 +209,7 @@ public final class Validation {
 		throws IllegalArgumentException {
 
 		// Exit if valid
-		if (port > 0 && port <= 65535) return port;
+		if (isPortNumberValid(port)) return port;
 
 		// Otherwise go ahead and throw exception
 		String message = composeMessage(variableName, INVALID_PORT_MESSAGE);
@@ -207,6 +219,13 @@ public final class Validation {
 
 		// Update stacktrace and throw it
 		throw updateStackTrace(iae, 0);
+	}
+
+	// TODO docs
+	public static boolean isPortNumberValid(int port) {
+
+		// Return result
+		return port > 0 && port <= 65535;
 	}
 
 	/**
@@ -252,11 +271,7 @@ public final class Validation {
 		hostname = innerAssertNonnull(hostname, variableName, 1);
 
 		// Exit if valid
-		if (VALID_HOSTNAME_REGEX.matcher(hostname).matches() ||
-			VALID_IPV4_REGEX.matcher(hostname).matches() ||
-			VALID_IPV6_REGEX.matcher(hostname).matches()) {
-			return hostname;
-		}
+		if (isHostnameValid(hostname)) return hostname;
 
 		// Otherwise go ahead and throw exception
 		String message = composeMessage(variableName, INVALID_HOSTNAME_MESSAGE);
@@ -266,6 +281,63 @@ public final class Validation {
 
 		// Update stacktrace and throw it
 		throw updateStackTrace(iae, 0);
+	}
+
+	// TODO docs
+	public static boolean isHostnameValid(@Nullable String hostname) {
+
+		// Return false if null
+		if (hostname == null) return false;
+
+		// Valid IP is acceptable
+		if (isIPAddressValid(hostname)) return true;
+
+		// Split the dots
+		String[] split = hostname.split("\\.");
+
+		// Fail if not enough dots
+		if (split.length < 2) return false;
+
+		// Get last entry, test it for TLD
+		if (!isTopLevelDomainValid(split[split.length - 1])) return false;
+
+		// Test all other remaining dots
+		for (int splitIndex = 0; splitIndex < split.length - 1; splitIndex++) {
+
+			// Get string
+			String part = split[splitIndex];
+
+			// Make sure it's not blank
+			if (part.trim().isEmpty()) return false;
+
+			// Iterate through characters
+			for (int charIndex = 0; charIndex < part.length(); charIndex++) {
+
+				// Get character
+				char character = part.charAt(charIndex);
+
+				// All good if alphanumeric
+				if (Character.isLetterOrDigit(character)) continue;
+
+				// All good if punycode
+				if (isPunyCode(character)) continue;
+
+				// If hyphen, make sure only one hyphen and is not at either ends
+				if (character == '-') {
+					if (charIndex == 0) return false;
+					if (charIndex == (part.length() - 1)) return false;
+					if (part.charAt(charIndex - 1) == '-') return false;
+					continue;
+				}
+
+				// Fail f arrived here
+				return false;
+			}
+
+		}
+
+		// True if fallen through to here
+		return true;
 	}
 
 	/**
@@ -311,7 +383,7 @@ public final class Validation {
 		address = innerAssertNonnull(address, variableName, 1);
 
 		// Exit if valid
-		if (VALID_IPV4_REGEX.matcher(address).matches() || VALID_IPV6_REGEX.matcher(address).matches()) return address;
+		if (isIPAddressValid(address)) return address;
 
 		// Otherwise go ahead and throw exception
 		String message = composeMessage(variableName, INVALID_IP_MESSAGE);
@@ -323,55 +395,63 @@ public final class Validation {
 		throw updateStackTrace(iae, 0);
 	}
 
-	/**
-	 * Asserts that email address is valid. If it is invalid, then an exception will be thrown.
-	 *
-	 * @param email_address email address to be asserted
-	 * @return valid email address
-	 * @throws IllegalArgumentException thrown if the email address is invalid in any way
-	 */
-	@Nonnull
-	public static String assertValidEmailAddress(@Nullable String email_address) throws IllegalArgumentException {
-		return innerAssertValidEmailAddress(email_address, null);
+	// TODO docs
+	public static boolean isIPAddressValid(@Nullable String address) {
+
+		// Return false if null
+		if (address == null) return false;
+
+		// Exit if valid
+		return VALID_IPV4_REGEX.matcher(address).matches() || VALID_IPV6_REGEX.matcher(address).matches();
 	}
 
 	/**
 	 * Asserts that email address is valid. If it is invalid, then an exception will be thrown.
 	 *
-	 * @param email_address email address to be asserted
-	 * @param variableName  name of variable
+	 * @param emailAddress email address to be asserted
 	 * @return valid email address
 	 * @throws IllegalArgumentException thrown if the email address is invalid in any way
 	 */
 	@Nonnull
-	public static String assertValidEmailAddress(@Nullable String email_address, @Nonnull String variableName)
+	public static String assertValidEmailAddress(@Nullable String emailAddress) throws IllegalArgumentException {
+		return innerAssertValidEmailAddress(emailAddress, null);
+	}
+
+	/**
+	 * Asserts that email address is valid. If it is invalid, then an exception will be thrown.
+	 *
+	 * @param emailAddress email address to be asserted
+	 * @param variableName name of variable
+	 * @return valid email address
+	 * @throws IllegalArgumentException thrown if the email address is invalid in any way
+	 */
+	@Nonnull
+	public static String assertValidEmailAddress(@Nullable String emailAddress, @Nonnull String variableName)
 		throws IllegalArgumentException {
 		innerAssertNonnull(variableName, "variableName", -1);
-		return innerAssertValidEmailAddress(email_address, variableName);
+		return innerAssertValidEmailAddress(emailAddress, variableName);
 	}
 
 	/**
 	 * Asserts that email address is valid. If it is invalid, then an exception will be thrown.
 	 *
-	 * @param email_address email address to be asserted
-	 * @param variableName  name of variable
+	 * @param emailAddress email address to be asserted
+	 * @param variableName name of variable
 	 * @return valid email address
 	 * @throws IllegalArgumentException thrown if the email address is invalid in any way
 	 */
 	@Nonnull
-	private static String innerAssertValidEmailAddress(@Nullable String email_address, @Nullable String variableName)
+	private static String innerAssertValidEmailAddress(@Nullable String emailAddress, @Nullable String variableName)
 		throws IllegalArgumentException {
 
 		// Assert non null
-		email_address = innerAssertNonnull(email_address, variableName, 1);
+		emailAddress = innerAssertNonnull(emailAddress, variableName, 1);
 
-		// Lowercase email address
-		email_address = email_address.toLowerCase();
+		// Assert nonempty
+		emailAddress = innerAssertNonemptyString(emailAddress, variableName, 1);
 
-		int split = findAtSymbol(email_address);
-
-		// Exit if valid
-		if (VALID_EMAIL_REGEX.matcher(email_address.toLowerCase()).matches()) return email_address;
+		// Check email
+		if (isEmailAddressValid(emailAddress)) return emailAddress;
 
 		// Otherwise go ahead and throw exception
 		String message = composeMessage(variableName, INVALID_EMAIL_MESSAGE);
@@ -383,8 +463,185 @@ public final class Validation {
 		throw updateStackTrace(iae, 0);
 	}
 
-	private static int findAtSymbol(@Nonnull String emailAddress) {
-		return 0;
+	/**
+	 * Checks if character is indeed a punycode
+	 *
+	 * @param character character to be tested
+	 * @return true if punycode, false if not punycode
+	 */
+	private static boolean isPunyCode(char character) {
+
+		try {
+
+			// Attempt to convert char to punycode
+			String str = IDN.toASCII(character + "", IDN.USE_STD3_ASCII_RULES);
+
+			// Check if valid punycode
+			if (str.startsWith("xn--")) return true;
+
+		} catch (IllegalArgumentException e) {
+			// Do nothing - let it flow
+		}
+
+		// Return false
+		return false;
+	}
+
+	/**
+	 * Checks if provided Top Level Domain name string is indeed valid Top Level Domain name
+	 *
+	 * @param tld string to be tested
+	 * @return true if valid, false if not valid
+	 */
+	public static boolean isTopLevelDomainValid(@Nullable String tld) {
+
+		// Null check
+		if (tld == null) return false;
+
+		// Blank check
+		if (tld.trim().isEmpty()) return false;
+
+		// Scan through characters
+		for (int i = 0; i < tld.length(); i++) {
+
+			// Get character
+			char character = tld.charAt(i);
+
+			// If alphanumeric, then check if in list of approved unicode
+			if (Character.isLetterOrDigit(character)) continue;
+
+			// Check if punycode
+			if (isPunyCode(character)) continue;
+
+			// Otherwise false
+			return false;
+		}
+
+		// True if reached here
+		return true;
+	}
+
+	// TODO docs
+	private static boolean checkEmailAddressLocalPart(@Nonnull String recipient) {
+
+		// Check if blank
+		if (recipient.trim().isEmpty()) return false;
+
+		// 64 characters maximum
+		if (recipient.length() > 64) return false;
+
+		// Iterate over string
+		boolean quoted = false;
+		for (int charIndex = 0; charIndex < recipient.length(); charIndex++) {
+
+			// Get character
+			char character = recipient.charAt(charIndex);
+
+			// Check if escape
+			boolean escaped = false;
+			if (character == '\\') {
+
+				// If not in quoted space, hard fail
+				if (!quoted) return false;
+
+				// Toggle it
+				escaped = true;
+
+				// Check if there's next character
+				if (charIndex + 1 >= recipient.length() - 1) return false;
+
+				// Get next character
+				char nextCharacter = recipient.charAt(charIndex + 1);
+
+				// Check if escape is reasonable
+				if (!EMAIL_LOCAL_ALLOWED_SPECIAL_CHARS_WITH_ESCAPE.contains(nextCharacter)) return false;
+			}
+
+			// Handle quotes
+			if (!escaped && character == '"') quoted = !quoted;
+
+			// Enter non-quoted mode
+			if (!quoted) {
+
+				// Handle if dot
+				if (character == '.') {
+
+					// Must not begin or end
+					if (charIndex == 0 || charIndex == recipient.length() - 1) return false;
+
+					// Must not successive, get prev and compare
+					if (recipient.charAt(charIndex - 1) == '.') return false;
+
+					// Continue
+					continue;
+				}
+
+				// Check allowed chars
+				if (Character.isLetterOrDigit(character)) continue;
+
+				// Check if punycode
+				if (isPunyCode(character)) continue;
+
+				// Check specials
+				if (!EMAIL_LOCAL_ALLOWED_SPECIAL_CHARS.contains(character)) return false;
+			}
+		}
+
+		// Fail if not quote is not closed, otherwise success
+		return !quoted;
+	}
+
+	// TODO docs
+	// http://rumkin.com/software/email/rules.php
+	public static boolean isEmailAddressValid(@Nullable String emailAddress) {
+
+		// Null check
+		if (emailAddress == null) return false;
+
+		// Blank check
+		if (emailAddress.trim().isEmpty()) return false;
+
+		// Lowercase email address
+		emailAddress = emailAddress.toLowerCase();
+
+		// Search fo @ symbol
+		int split = emailAddress.indexOf("@");
+
+		// Make sure @ symbol exists
+		if (split == -1) return false;
+
+		// Split it
+		String first = emailAddress.substring(0, split); // Guaranteed no @ in this one, so no need to check that
+		String second = emailAddress.substring(split + 1);
+
+		// Check first one
+		if (!checkEmailAddressLocalPart(first)) return false;
+
+		// Check second one
+		return checkEmailHostnamePart(second);
+	}
+
+	// TODO docs
+	private static boolean checkEmailHostnamePart(@Nonnull String hostname) {
+
+		// If hostname is valid, then shortcut
+		if (isHostnameValid(hostname)) return true;
+
+		// Check if bracketed
+		if (hostname.charAt(0) == '[') {
+
+			// Make sure there's a bracket on other side
+			if (hostname.charAt(hostname.length() - 1) != ']') return false;
+
+			// Check length
+			if (hostname.length() >= 245) return false;
+
+			// Substring then do hostname check again
+			return isHostnameValid(hostname.substring(1, hostname.length() - 1));
+		}
+
+		// False if arrived here
+		return false;
 	}
 
 	/**
@@ -810,7 +1067,7 @@ public final class Validation {
 	 * @throws IllegalArgumentException thrown if the string is invalid in any way
 	 */
 	public static String assertNonemptyString(@Nullable String string) throws IllegalArgumentException {
-		return innerAssertNonemptyString(string, null);
+		return innerAssertNonemptyString(string, null, 0);
 	}
 
 	/**
@@ -825,7 +1082,7 @@ public final class Validation {
 	public static String assertNonemptyString(@Nullable String string, @Nonnull String variableName)
 		throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
-		return innerAssertNonemptyString(string, variableName);
+		return innerAssertNonemptyString(string, variableName, 0);
 	}
 
 	/**
@@ -834,14 +1091,18 @@ public final class Validation {
 	 *
 	 * @param string       string to be asserted
 	 * @param variableName name of variable
+	 * @param level        level of calls. This is used to adjust the stacktrace.
 	 * @return valid nonempty string
 	 * @throws IllegalArgumentException thrown if the string is invalid in any way
 	 */
-	private static String innerAssertNonemptyString(@Nullable String string, @Nullable String variableName)
-		throws IllegalArgumentException {
+	private static String innerAssertNonemptyString(
+		@Nullable String string,
+		@Nullable String variableName,
+		@Nonnegative int level
+	) throws IllegalArgumentException {
 
 		// Assert non null
-		string = innerAssertNonnull(string, variableName, 1);
+		string = innerAssertNonnull(string, variableName, level + 1);
 
 		// Exit if not empty
 		if (!string.trim().equals("")) return string;
@@ -853,7 +1114,7 @@ public final class Validation {
 		IllegalArgumentException iae = new IllegalArgumentException(message);
 
 		// Update stacktrace and throw it
-		throw updateStackTrace(iae, 0);
+		throw updateStackTrace(iae, level);
 	}
 
 	/**
@@ -970,15 +1231,15 @@ public final class Validation {
 	 * Asserts that set does not contain any null elements. If it does contain null elements, then an exception will be thrown.
 	 * Additionally, it can assert if set is non-empty if requested.
 	 *
-	 * @param <T>           type of array
-	 * @param set           set to be asserted
-	 * @param empty_allowed true to allow an empty set, false to assert a non-empty set
+	 * @param <T>          type of array
+	 * @param set          set to be asserted
+	 * @param emptyAllowed true to allow an empty set, false to assert a non-empty set
 	 * @return valid nonnull set
 	 * @throws IllegalArgumentException thrown if the set is invalid in any way
 	 */
-	public static <T> Set<T> assertNonnullElements(@Nullable Set<T> set, boolean empty_allowed)
+	public static <T> Set<T> assertNonnullElements(@Nullable Set<T> set, boolean emptyAllowed)
 		throws IllegalArgumentException {
-		return innerAssertNonnullElements(set, null, empty_allowed);
+		return innerAssertNonnullElements(set, null, emptyAllowed);
 	}
 
 	/**
@@ -988,18 +1249,18 @@ public final class Validation {
 	 * @param <T>           type of array
 	 * @param set           set to be asserted
 	 * @param variableName  name of variable
-	 * @param empty_allowed true to allow an empty set, false to assert a non-empty set
+	 * @param emptyAllowed true to allow an empty set, false to assert a non-empty set
 	 * @return valid nonnull set
 	 * @throws IllegalArgumentException thrown if the set is invalid in any way
 	 */
 	public static <T> Set<T> assertNonnullElements(
 		@Nullable Set<T> set,
 		@Nonnull String variableName,
-		boolean empty_allowed
+		boolean emptyAllowed
 	)
 		throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
-		return innerAssertNonnullElements(set, variableName, empty_allowed);
+		return innerAssertNonnullElements(set, variableName, emptyAllowed);
 	}
 
 	/**
@@ -1009,21 +1270,21 @@ public final class Validation {
 	 * @param <T>           type of array
 	 * @param set           set to be asserted
 	 * @param variableName  name of variable
-	 * @param empty_allowed true to allow an empty set, false to assert a non-empty set
+	 * @param emptyAllowed true to allow an empty set, false to assert a non-empty set
 	 * @return valid nonnull set
 	 * @throws IllegalArgumentException thrown if the set is invalid in any way
 	 */
 	private static <T> Set<T> innerAssertNonnullElements(
 		@Nullable Set<T> set,
 		@Nullable String variableName,
-		boolean empty_allowed
+		boolean emptyAllowed
 	) throws IllegalArgumentException {
 
 		// Assert non null
 		innerAssertNonnull(set, variableName, 1);
 
 		// Assert nonempty if needed
-		if (!empty_allowed) innerAssertNonempty(set, variableName, 1);
+		if (!emptyAllowed) innerAssertNonempty(set, variableName, 1);
 
 		// Check for any nulls
 		if (!set.contains(null)) return set;
@@ -1038,20 +1299,59 @@ public final class Validation {
 		throw updateStackTrace(iae, 0);
 	}
 
+	// TODO docs
+	public static boolean containsNonnullElements(@Nullable Set<?> set, boolean emptyAllowed) {
+
+		// Assert non null
+		if (set == null) return false;
+
+		// Assert nonempty if needed
+		if (!emptyAllowed && set.isEmpty()) return false;
+
+		// Check for any nulls
+		return !set.contains(null);
+	}
+
+	// TODO docs
+	public static boolean containsNonnullElements(@Nullable Object[] array, boolean emptyAllowed) {
+
+		// Assert non null
+		if (array == null) return false;
+
+		// Assert nonempty if needed
+		if (!emptyAllowed && array.length == 0) return false;
+
+		// Check for any nulls
+		return Arrays.stream(array).noneMatch(Objects::isNull);
+	}
+
+	// TODO docs
+	public static boolean containsNonnullElements(@Nullable Collection<?> collection, boolean emptyAllowed) {
+
+		// Assert non null
+		if (collection == null) return false;
+
+		// Assert nonempty if needed
+		if (!emptyAllowed && collection.isEmpty()) return false;
+
+		// Check for any nulls
+		return collection.stream().noneMatch(Objects::isNull);
+	}
+
 	/**
 	 * Asserts that collection does not contain any null elements. If it does contain null elements, then an exception will be thrown.
 	 * Additionally, it can assert if collection is non-empty if requested.
 	 *
-	 * @param <T>           type of array
-	 * @param collection    collection to be asserted
-	 * @param empty_allowed true to allow an empty collection, false to assert a non-empty collection
+	 * @param <T>          type of array
+	 * @param collection   collection to be asserted
+	 * @param emptyAllowed true to allow an empty collection, false to assert a non-empty collection
 	 * @return valid nonnull collection
 	 * @throws IllegalArgumentException thrown if the collection is invalid in any way
 	 */
-	public static <T> Collection<T> assertNonnullElements(@Nullable Collection<T> collection, boolean empty_allowed)
+	public static <T> Collection<T> assertNonnullElements(@Nullable Collection<T> collection, boolean emptyAllowed)
 		throws IllegalArgumentException {
-		if (collection instanceof Set) return innerAssertNonnullElements((Set<T>) collection, null, empty_allowed);
-		else return innerAssertNonnullElements(collection, null, empty_allowed);
+		if (collection instanceof Set) return innerAssertNonnullElements((Set<T>) collection, null, emptyAllowed);
+		else return innerAssertNonnullElements(collection, null, emptyAllowed);
 	}
 
 	/**
@@ -1061,19 +1361,19 @@ public final class Validation {
 	 * @param <T>           type of array
 	 * @param collection    collection to be asserted
 	 * @param variableName  name of variable
-	 * @param empty_allowed true to allow an empty collection, false to assert a non-empty collection
+	 * @param emptyAllowed true to allow an empty collection, false to assert a non-empty collection
 	 * @return valid nonnull collection
 	 * @throws IllegalArgumentException thrown if the collection is invalid in any way
 	 */
 	public static <T> Collection<T> assertNonnullElements(
 		@Nullable Collection<T> collection,
 		@Nonnull String variableName,
-		boolean empty_allowed
+		boolean emptyAllowed
 	) throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
 		if (collection instanceof Set)
-			return innerAssertNonnullElements((Set<T>) collection, variableName, empty_allowed);
-		else return innerAssertNonnullElements(collection, variableName, empty_allowed);
+			return innerAssertNonnullElements((Set<T>) collection, variableName, emptyAllowed);
+		else return innerAssertNonnullElements(collection, variableName, emptyAllowed);
 	}
 
 	/**
@@ -1083,21 +1383,21 @@ public final class Validation {
 	 * @param <T>           type of array
 	 * @param collection    collection to be asserted
 	 * @param variableName  name of variable
-	 * @param empty_allowed true to allow an empty collection, false to assert a non-empty collection
+	 * @param emptyAllowed true to allow an empty collection, false to assert a non-empty collection
 	 * @return valid nonnull collection
 	 * @throws IllegalArgumentException thrown if the collection is invalid in any way
 	 */
 	private static <T> Collection<T> innerAssertNonnullElements(
 		@Nullable Collection<T> collection,
 		@Nullable String variableName,
-		boolean empty_allowed
+		boolean emptyAllowed
 	) throws IllegalArgumentException {
 
 		// Assert non null
 		innerAssertNonnull(collection, variableName, 1);
 
 		// Pass it forward
-		innerAssertNonnullElements(collection.toArray(new Object[0]), variableName, empty_allowed, 1);
+		innerAssertNonnullElements(collection.toArray(new Object[0]), variableName, emptyAllowed, 1);
 
 		// Return it
 		return collection;
@@ -1107,15 +1407,15 @@ public final class Validation {
 	 * Asserts that array does not contain any null elements. If it does contain null elements, then an exception will be thrown.
 	 * Additionally, it can assert if array is non-empty if requested.
 	 *
-	 * @param <T>           type of array
-	 * @param array         array to be asserted
-	 * @param empty_allowed true to allow an empty array, false to assert a non-empty array
+	 * @param <T>          type of array
+	 * @param array        array to be asserted
+	 * @param emptyAllowed true to allow an empty array, false to assert a non-empty array
 	 * @return valid nonnull array
 	 * @throws IllegalArgumentException thrown if the array is invalid in any way
 	 */
-	public static <T> T[] assertNonnullElements(@Nullable T[] array, boolean empty_allowed)
+	public static <T> T[] assertNonnullElements(@Nullable T[] array, boolean emptyAllowed)
 		throws IllegalArgumentException {
-		return innerAssertNonnullElements(array, null, empty_allowed, 0);
+		return innerAssertNonnullElements(array, null, emptyAllowed, 0);
 	}
 
 	/**
@@ -1125,17 +1425,17 @@ public final class Validation {
 	 * @param <T>           type of array
 	 * @param array         array to be asserted
 	 * @param variableName  name of variable
-	 * @param empty_allowed true to allow an empty array, false to assert a non-empty array
+	 * @param emptyAllowed true to allow an empty array, false to assert a non-empty array
 	 * @return valid nonnull array
 	 * @throws IllegalArgumentException thrown if the array is invalid in any way
 	 */
 	public static <T> T[] assertNonnullElements(
 		@Nullable T[] array,
 		@Nonnull String variableName,
-		boolean empty_allowed
+		boolean emptyAllowed
 	) throws IllegalArgumentException {
 		assertNonnull(variableName, "variableName");
-		return innerAssertNonnullElements(array, variableName, empty_allowed, 0);
+		return innerAssertNonnullElements(array, variableName, emptyAllowed, 0);
 	}
 
 	/**
@@ -1145,7 +1445,7 @@ public final class Validation {
 	 * @param <T>           type of array
 	 * @param array         array to be asserted
 	 * @param variableName  name of variable
-	 * @param empty_allowed true to allow an empty array, false to assert a non-empty array
+	 * @param emptyAllowed true to allow an empty array, false to assert a non-empty array
 	 * @param level         level of calls. This is used to adjust the stacktrace.
 	 * @return valid nonnull array
 	 * @throws IllegalArgumentException thrown if the array is invalid in any way
@@ -1154,7 +1454,7 @@ public final class Validation {
 	private static <T> T[] innerAssertNonnullElements(
 		@Nullable T[] array,
 		@Nullable String variableName,
-		boolean empty_allowed,
+		boolean emptyAllowed,
 		int level
 	) throws IllegalArgumentException {
 
@@ -1162,7 +1462,7 @@ public final class Validation {
 		innerAssertNonnull(array, variableName, level + 1);
 
 		// Assert nonempty if needed
-		if (!empty_allowed) innerAssertNonempty(array, variableName, level + 1);
+		if (!emptyAllowed) innerAssertNonempty(array, variableName, level + 1);
 
 		// List to collect any nulls
 		List<Integer> nulls = new LinkedList<>();
